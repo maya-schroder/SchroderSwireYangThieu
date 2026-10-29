@@ -23,6 +23,7 @@ Current scripts included in our repo are as follows:
 * `Income_CalFairPlan_2021_2024.R` joins the California Fair Plan CSV files and the ACS CSVs to compare Fair Plan policies and income by zip code
 * `Preliminary_Exploratory_Analysis.ipynb` performs initial analysis of the joined CSV to help inform our ability to conduct further analysis
 
+## Data Dictionary 
+To be completed in week 3 upon creation of final processed data that has sticthed toghether US Census Data, California Fair Plan Insurance Data, and wildfire data. Further time is needed before final update. 
 
-
-README last updated 10/27/2026
+README last updated 10/29/2026
