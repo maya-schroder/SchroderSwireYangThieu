@@ -9,21 +9,30 @@ Raw data can be found in the `raw` folder. This is data pulled directly from the
 
 
 ## Docs
-Currently, docs only includes our Team Charter, which lays out our goals and workplan to accomplish this project. The Team Charter is subject to change.
+Docs include our Team Charter and Week 2 updates. Additional documentation associated with our project may be uploaded here in the future.
 
 
 ## Scripts
 Current scripts included in our repo are as follows:
-* `ACS_Import_Clean.ipynb` checks ACS CSV files and pulls in ACS shapefile data
-* `cal_fire_shapefiles.ipynb` analyze California wildfire shapefiles. We plan to join this with ACS data
-* `cfp_commercial_risk_data_scrape.ipynb` scrapes the California Fair Plan commercial policies PDF data to create a CSV
+* `ACS_County_Income.ipynb` pulls in ACS income data for 2021-2024, looking at median income on a county level. We save the API pull as a CSV in our `raw` data folder.
+* `CA_FAIR_Plan_Analysis.R` reviews and analyzes California Fair Plan enrollment over time, creating CSVs that organize trends.
+* `cal_fire_shapefiles.ipynb` analyzes California wildfire shapefiles. 
 * `cfp_general_plan_data_scrape.ipynb` scrapes the California Fair Plan general plan PDF data to create a CSV
-* `cfp_residential_risk_data_scrape.ipynb` scrapes the California Fair Plan residential policies PDF data to create a CSV
-* `CSV_Data_Quality_Audit.ipynb` checks the data joined in `Income_CalFairPlan_2021_2024.R` to ensure that joins were performed correctly and checks the status of missing data.
-* `Income_CalFairPlan_2021_2024.R` joins the California Fair Plan CSV files and the ACS CSVs to compare Fair Plan policies and income by zip code
-* `Preliminary_Exploratory_Analysis.ipynb` performs initial analysis of the joined CSV to help inform our ability to conduct further analysis
+* `cfp_risk_exposure.ipynb` scrapes the California Fair Plan exposure and risk PDF data to create a CSV
+* `fire_income_connect.ipynb` join the wildfire and ACS income data to create a preliminary map showing the overlap. We will expand on this in the next couple weeks.
+* `Income_CalFAIR_Redux.R` joins the California Fair Plan CSV files and the ACS CSVs to compare Fair Plan policies and income by county
+* `Spatial-VectorData.ipynb` is a script created by John Fay to share spatial data basics in Python. We are using this for reference.
+
+Scripts in the `old` folder are scripts we wrote when processing and joining the data at a zip code level. We moved to county-level after assessing the feasibility of working with zip codes and ZCTAs (Census zip code tract area groupings) and ultimately determined that county-level would be more appropriate given our timeline.
+
 
 ## Data Dictionary 
-To be completed in week 3 upon creation of final processed data that has sticthed toghether US Census Data, California Fair Plan Insurance Data, and wildfire data. Further time is needed before final update. 
+We do not have a single CSV that stores all of our data, but general key terms associated with our processed data can be found here:
+* **county** is our general join key across different data sources
+* **year** is the other join key across different data sources (2021-2024 is the primary overlap, but we are looking at Fair Plan data up to 2026 to get a sense of general trends)
+* **policies** refer to the number of Fair Plan policies in a county in a year, while **exposure** is the amount of risk California is taking on by insuring these homeowners ($). We use absolute and percent change to evaluate growth by county over time.
+* **income** is the median income in a county measured by the ACS each year. We are using the ACS five-year estimates, so 2021 represents median income across 2017-2021. Income is represented in dollars for that year (e.g., 2021 income is represented in 2021 dollars)
+* **income_moe** represents the Census margin of error associated with the median income estimate. We do not plan to directly incorporate this in our analysis, but it is helpful to include nonetheless
 
-README last updated 10/29/2026
+
+README last updated 11/2/2026.
