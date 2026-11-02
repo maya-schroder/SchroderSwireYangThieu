@@ -35,5 +35,12 @@ We do not have a single CSV that stores all of our data, but general key terms a
 * **income** is the median income in a county measured by the ACS each year. We are using the ACS five-year estimates, so 2021 represents median income across 2017-2021. Income is represented in dollars for that year (e.g., 2021 income is represented in 2021 dollars)
 * **income_moe** represents the Census margin of error associated with the median income estimate. We do not plan to directly incorporate this in our analysis, but it is helpful to include nonetheless
 
+The county table (`County_Income_CFP_Fire_2022_2024.csv`, from `County_Exploratory_Analysis.ipynb`) has one row per county (58 rows) and adds these columns:
+* **policies_2022**, **policies_2023**, **policies_2024** are the number of Fair Plan policies in the county in each year
+* **policy_growth_pct** is the percent change in Fair Plan policies from 2022 to 2024, measured against the county's own 2022 policies. Counties that started with very few policies (Colusa, Glenn, Kings, Sutter had fewer than 50 in 2022) can show large percent changes from small increases
+* **Median_income** is the county's ACS median household income for 2022 (the 2018-2022 five-year estimate, in 2022 dollars)
+* **acres_burned_total** is the total acres burned inside the county by wildfires in 2022-2024, from the CAL FIRE perimeters split by county. Counties with no fire in those years are 0. This measures fires that actually happened, not wildfire risk
+* **income_group** splits the counties into three equal-sized groups by 2022 median income (Lower, Middle, Higher income)
+
 
 README last updated 11/2/2026.
