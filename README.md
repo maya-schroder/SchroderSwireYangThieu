@@ -19,6 +19,7 @@ Current scripts included in our repo are as follows:
 * `cal_fire_shapefiles.ipynb` analyzes California wildfire shapefiles. 
 * `cfp_general_plan_data_scrape.ipynb` scrapes the California Fair Plan general plan PDF data to create a CSV
 * `cfp_risk_exposure.ipynb` scrapes the California Fair Plan exposure and risk PDF data to create a CSV
+* `County_Exploratory_Analysis.ipynb` builds a county-level table (Fair Plan policy growth 2022-2024, 2022 median income, and acres burned 2022-2024) and uses it for our exploratory figures and summary table: income vs. policy growth, acres burned vs. policy growth, a summary table by income group, and policy trends by income group. 
 * `fire_income_connect.ipynb` join the wildfire and ACS income data to create a preliminary map showing the overlap. We will expand on this in the next couple weeks.
 * `Income_CalFAIR_Redux.R` joins the California Fair Plan CSV files and the ACS CSVs to compare Fair Plan policies and income by county
 * `Spatial-VectorData.ipynb` is a script created by John Fay to share spatial data basics in Python. We are using this for reference.
