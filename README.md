@@ -24,6 +24,8 @@ Current scripts included in our repo are as follows:
 * `Income_CalFAIR_Redux.R` joins the California Fair Plan CSV files and the ACS CSVs to compare Fair Plan policies and income by county
 * `Spatial-VectorData.ipynb` is a script created by John Fay to share spatial data basics in Python. We are using this for reference.
 
+Scripts in the `Dashboard` folder compile our data for the dashboard. These include spatial scripts and non-spatial data analysis.
+
 Scripts in the `old` folder are scripts we wrote when processing and joining the data at a zip code level. We moved to county-level after assessing the feasibility of working with zip codes and ZCTAs (Census zip code tract area groupings) and ultimately determined that county-level would be more appropriate given our timeline.
 
 
@@ -43,4 +45,4 @@ The county table (`County_Income_CFP_Fire_2022_2024.csv`, from `County_Explorato
 * **income_group** splits the counties into three equal-sized groups by 2022 median income (Lower, Middle, Higher income)
 
 
-README last updated 11/2/2026.
+README last updated 11/5/2026.
