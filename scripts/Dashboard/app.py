@@ -1,5 +1,7 @@
 # Step 1: import packages and read in data
 import pandas as pd
+import geopandas as gpd
+import folium 
 import seaborn as sns
 from pathlib import Path
 import matplotlib
@@ -100,6 +102,93 @@ fire_plot_data_all = pd.concat(
         ))], ignore_index=True
 )
 
+#inserting file paths for the wildifre and income connect
+fire_data = pd.read_csv(processed_fldr / 'fire_by_county_2022_2024.csv')
+income_data = pd.read_csv(processed_fldr / 'County_Income_CFP_2022_2024.csv')
+
+fire_data_clean = fire_data.drop(columns=[
+    'Unnamed: 0', 'sqmi_burned', 'cause_description', 'fire_length_days'
+])
+
+income_data_clean = (
+    income_data
+    .assign(county_name = lambda d: d['county'].str.strip() + ' County')
+    .drop(columns=['county', 'GEOID'])
+)
+
+fire_income_joined = fire_data_clean.merge(
+    income_data_clean[['county_name', 'year', 'Median_income', 'policies', 'exposure']],
+    on=['county_name', 'year'],
+    how='left',
+)
+
+county_fire_summary = (
+    fire_income_joined
+    .groupby(['county_name', 'year'], as_index=False)
+    .agg(
+        total_acres_burned=('acres_burned', 'sum'),
+        number_of_fires=('fire_name', 'nunique'),
+        county_median_income=('Median_income', 'first'),
+        county_policies=('policies', 'first'),
+        county_exposure=('exposure', 'first')
+    )
+    .round({'total_acres_burned': 2})
+)
+
+# loading shapefiles in for the connect 
+fire_shp = raw_fldr / 'cal_fire_historical_data' / 'California_Historic_Fire_Perimeters_-6302641808644124224.zip'
+ca_county_boundaries = raw_fldr / 'ca_counties_boundaries.zip'
+
+#aligning epsg to ensure the wildfire and income county data are the same coordinate system 
+wildfires_gdf = gpd.read_file(fire_shp).to_crs(epsg=3310)
+ca_counties_gdf = gpd.read_file(ca_county_boundaries).to_crs(epsg=3310)
+
+#KEY FILTER!! Choosing the years to display in the widget
+wildfires_gdf = wildfires_gdf[wildfires_gdf['YEAR_'].isin([2022, 2023, 2024])]
+wildfires_gdf['geometry'] = wildfires_gdf.geometry.simplify(100) #simplifying the polygons to display faster in widget
+
+
+# creating a flexible widget to be used in the master app to choose the year to display data
+def build_map(map_year):
+    counties_year = (
+        ca_counties_gdf[['CDTFA_COUN', 'geometry']]
+        .rename(columns={'CDTFA_COUN': 'county_name'})
+        .merge(
+            income_data_clean.query('year == @map_year')[['county_name', 'Median_income']],
+            on='county_name',
+            how='left'
+        )
+        .merge(
+            county_fire_summary.query('year == @map_year')[['county_name', 'total_acres_burned', 'number_of_fires']],
+            on='county_name',
+            how='left'
+        )
+    )
+
+    # counties shaded by income: darker = higher
+    income_fire_map = counties_year.explore(
+        column='Median_income',
+        cmap='Blues',
+        tiles='OpenStreetMap',
+        style_kwds={'fillOpacity': 0.6, 'weight': 0.5, 'color': '#000000'},
+        tooltip=['county_name', 'Median_income', 'total_acres_burned', 'number_of_fires'],
+        legend=True,
+        legend_kwds={'caption': f'Median Household Income ({map_year})'},
+        name='County Median Income'
+    )
+
+    # that year's fire perimeters on top
+    wildfires_gdf.query('YEAR_ == @map_year').explore(
+        m=income_fire_map,
+        color='#e21d1d',
+        style_kwds={'fillOpacity': 0.8, 'weight': 0.5},
+        tooltip=['FIRE_NAME', 'GIS_ACRES'],
+        name=f'{map_year} Fires'
+    )
+
+    folium.LayerControl().add_to(income_fire_map)
+    return income_fire_map
+
 
 app_ui = ui.page_fluid(
     ui.panel_title("Wildfire Data Dashboard"),
@@ -107,7 +196,15 @@ app_ui = ui.page_fluid(
         ui.card_header("Acres Burned vs. Fair Plan Enrollment Change"),
         ui.output_plot("wildfire_chart"),
     ),
+    ui.card(
+        ui.card_header("Median Income & Wildfire Perimeters"),
+        ui.input_select("map_year", "Select year:",
+                        choices=["2022", "2023", "2024"], selected="2022"),
+        ui.output_ui("income_fire_map"),
+        full_screen=True,
+    ),
 )
+
 
 def server(input, output, session):
     @render.plot
@@ -137,6 +234,12 @@ def server(input, output, session):
     )
 
         return g.figure
+    
+    @render.ui
+    def income_fire_map():
+        m = build_map(int(input.map_year()))
+        return ui.HTML(m._repr_html_())
+
 
 
 app = App(app_ui, server)
