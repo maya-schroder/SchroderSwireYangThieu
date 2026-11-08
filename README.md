@@ -24,9 +24,16 @@ Current scripts included in our repo are as follows:
 * `Income_CalFAIR_Redux.R` joins the California Fair Plan CSV files and the ACS CSVs to compare Fair Plan policies and income by county
 * `Spatial-VectorData.ipynb` is a script created by John Fay to share spatial data basics in Python. We are using this for reference.
 
-Scripts in the `Dashboard` folder compile our data for the dashboard. These include spatial scripts and non-spatial data analysis.
-
 Scripts in the `old` folder are scripts we wrote when processing and joining the data at a zip code level. We moved to county-level after assessing the feasibility of working with zip codes and ZCTAs (Census zip code tract area groupings) and ultimately determined that county-level would be more appropriate given our timeline.
+
+### Dashboard Scripts
+Scripts in the `Dashboard` folder compile our data for the dashboard. These include spatial scripts and non-spatial data analysis. If running dashboard scripts, please see **app.py** for the full dashboard to run. You can run the dashboard from an activated environment by using the code `shiny run --reload app.py`. The activated environment requires that you have `shiny` installed in your Python environment. You can create this environment by running:
+
+` conda create -n env700-shiny -c conda-forge python=3.12 shiny geopandas pandas matplotlib seaborn folium mapclassify jupyterlab ipykernel ipywidgets` 
+
+Ensure when running the dashboard code that you have it connected back to your path where  `app.py` sits. 
+
+**A note on AI use in our dashboard:** Before creating our dashboard, all the code for underlying maps and charts was written by us for intermediate steps in building out our final product. We used AI to help adapt code to dashboard settings including distinguishing between interactive and static diagrams. The underlying product is all our own work, but AI helped with de-bugging and organizing app code.
 
 
 ## Data Dictionary 
@@ -45,4 +52,4 @@ The county table (`County_Income_CFP_Fire_2022_2024.csv`, from `County_Explorato
 * **income_group** splits the counties into three equal-sized groups by 2022 median income (Lower, Middle, Higher income)
 
 
-README last updated 11/5/2026.
+README last updated 11/8/2026.

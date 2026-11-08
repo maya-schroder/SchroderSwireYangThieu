@@ -19,7 +19,10 @@ sns.set_theme(
     font='sans-serif'
     )
 
-root_fldr = Path(__file__).resolve().parents[2] 
+try:
+    root_fldr = Path(__file__).resolve().parents[2]
+except NameError:
+    root_fldr = Path.cwd().resolve()
 raw_fldr = root_fldr / 'data' / 'raw'
 processed_fldr = root_fldr / 'data' / 'processed'
 
@@ -101,6 +104,63 @@ fire_plot_data_all = pd.concat(
         columns={'2023_acres_burned_total':'acres_burned_total','2023_total_fires':'total_fires'}
         ))], ignore_index=True
 )
+
+fire_fair_plan_data = (
+    all_data[['county', 'year', 'acres_burned_total', 'policies', 'exposure']]
+    .sort_values(['county', 'year'])
+    .reset_index(drop=True)
+)
+
+fire_fair_plan_data['fire_risk'] = (
+    fire_fair_plan_data.groupby('year')['acres_burned_total']
+    .transform(lambda s: pd.qcut(
+        s, q=4,
+        labels=['1. Lowest Risk', '2. Low-Moderate Risk',
+                '3. High-Moderate Risk', '4. High Risk'],
+        duplicates='drop'
+    ))
+)
+
+group_policies = (
+    fire_fair_plan_data
+    .pivot_table(index='fire_risk', columns='year', values='policies',
+                 aggfunc='sum', observed=True)
+    .reset_index()
+)
+
+group_index = group_policies.copy()
+for yr in [2022, 2023, 2024]:
+    group_index[yr] = group_policies[yr] / group_policies[2022] * 100
+
+group_trend = group_index.melt(
+    id_vars='fire_risk', var_name='year', value_name='policies_index'
+)
+group_trend['year'] = group_trend['year'].astype(int)
+
+risk_colors = {
+    '1. Lowest Risk': '#F8BBBB',
+    '2. Low-Moderate Risk': '#DF7A8E',
+    '3. High-Moderate Risk': '#D2042D',
+    '4. High Risk': '#800020',
+}
+
+# ---- Income vs. FAIR Plan ----
+income_fair_plan_data = (
+    all_data[['county', 'year', 'Median_income', 'policies', 'exposure']]
+    .sort_values(['county', 'year'])
+    .reset_index(drop=True)
+)
+
+income_fair_plan_data['policies_pct_change'] = (
+    income_fair_plan_data.groupby('county')['policies'].pct_change() * 100
+)
+
+income_fair_plan_data = income_fair_plan_data.assign(
+    dollars_per_policy=lambda df: df['exposure'] / df['policies']
+)
+
+income_colors_3yr = {2022: '#088F8F', 2023: '#00FF7F', 2024: '#B4C424'}
+income_colors_2yr = {2023: '#00FF7F', 2024: '#B4C424'}
 
 #inserting file paths for the wildifre and income connect
 fire_data = pd.read_csv(processed_fldr / 'fire_by_county_2022_2024.csv')
@@ -197,6 +257,18 @@ app_ui = ui.page_fluid(
         ui.output_plot("wildfire_chart"),
     ),
     ui.card(
+        ui.card_header("FAIR Plan Policies by Fire Risk Level"),
+        ui.output_plot("risk_trend_chart"),
+    ),
+    ui.card(
+        ui.card_header("Dollars per Policy vs. Median Income"),
+        ui.output_plot("income_dollars_chart"),
+    ),
+    ui.card(
+        ui.card_header("Median Income vs. % Change in Enrollment"),
+        ui.output_plot("income_enrollment_chart"),
+    ),
+    ui.card(
         ui.card_header("Median Income & Wildfire Perimeters"),
         ui.input_select("map_year", "Select year:",
                         choices=["2022", "2023", "2024"], selected="2022"),
@@ -204,7 +276,6 @@ app_ui = ui.page_fluid(
         full_screen=True,
     ),
 )
-
 
 def server(input, output, session):
     @render.plot
@@ -233,6 +304,61 @@ def server(input, output, session):
             facecolor="#FFFEFE"
     )
 
+        return g.figure
+
+    @render.plot
+    def risk_trend_chart():
+        g = sns.relplot(
+            data=group_trend,
+            x='year', y='policies_index', hue='fire_risk',
+            palette=risk_colors, kind='line', marker='o',
+            height=4, aspect=1.5,
+        ).set(
+            title='FAIR Plan Policies by Fire Risk Level',
+            xlabel='Year',
+            ylabel='Policies (2022 = 100)',
+            xticks=[2022, 2023, 2024],
+        )
+        sns.move_legend(
+            g, title='Fire Risk', loc='upper left', frameon=True,
+            bbox_to_anchor=(0.9, 1), facecolor="#FFFEFE"
+        )
+        return g.figure
+
+    @render.plot
+    def income_dollars_chart():
+        g = sns.lmplot(
+            data=income_fair_plan_data,
+            x='dollars_per_policy', y='Median_income', hue='year',
+            palette=income_colors_3yr, aspect=1.5,
+        ).set(
+            title='Dollars per Fair Plan Policy vs. Median Income',
+            xlabel='$ per Policy',
+            ylabel='Median Income',
+        )
+        g.ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("${x:,.0f}"))
+        sns.move_legend(
+            g, title='Year', loc='upper left', frameon=True,
+            bbox_to_anchor=(0.9, 1), facecolor="#FFFEFE"
+        )
+        return g.figure
+
+    @render.plot
+    def income_enrollment_chart():
+        g = sns.lmplot(
+            data=income_fair_plan_data.loc[income_fair_plan_data['year'] > 2022],
+            x='Median_income', y='policies_pct_change', hue='year',
+            palette=income_colors_2yr, aspect=1.5,
+        ).set(
+            title='Median Income vs. % Change in Fair Plan Enrollment',
+            xlabel='Median Income',
+            ylabel='YoY % Change in Fair Plan Enrollment',
+        )
+        g.ax.xaxis.set_major_formatter(ticker.StrMethodFormatter("${x:,.0f}"))
+        sns.move_legend(
+            g, title='Year', loc='upper left', frameon=True,
+            bbox_to_anchor=(0.9, 1), facecolor="#FFFEFE"
+        )
         return g.figure
     
     @render.ui
