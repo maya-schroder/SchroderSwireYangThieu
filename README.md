@@ -34,9 +34,9 @@ Scripts in the `App` folder compile our data for the dashboard. These include sp
 
 Ensure when running the dashboard code that you have it connected back to your path where  `app.py` sits.
 
-You can also access the dashboard via this [link](https://duke.is/SSYTApp).
+You can also access the dashboard via this [link](https://duke.is/SSYTApp). Following our peer review on 11/12, we cleaned up our figures in our dashboard and added contextual information around each figure. We also added context at the beginning to explain the FAIR Plan and how it operates in California.
 
-**A note on AI use in our dashboard:** Before creating our dashboard, all the code for underlying maps and charts was written by us for intermediate steps in building out our final product. We used AI to help adapt code to dashboard settings including distinguishing between interactive and static diagrams. The underlying product is all our own work, but AI helped with de-bugging and organizing app code. Additionally, AI helped with the formatting of the dashboard and provided code to make it look much cleaner and nicer. Our initial version was very sterile and simple, so AI helped us make it look more interesting. All underlying work continues to be our own.
+**A note on AI use in our dashboard:** Before creating our dashboard, all the code for underlying maps and charts was written by us for intermediate steps in building out our final product. We used AI to help adapt code to dashboard settings including distinguishing between interactive and static diagrams. The underlying product is all our own work, but AI helped with de-bugging and organizing app code. Additionally, AI helped with the formatting of the dashboard and provided code to make it look much cleaner and nicer. Our initial version was very sterile and simple, so AI helped us make it look more interesting. All underlying work continues to be our own. 
 
 
 ## Data Dictionary 
